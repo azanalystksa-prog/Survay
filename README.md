@@ -20,9 +20,10 @@ npm run dev        # http://localhost:3000
 
 Open **http://localhost:3000** and sign in with one click as any role.
 
-> **Reset the demo to a clean state between rehearsals:** stop the dev server (Ctrl-C),
-> run `npm run db:reset`, then `npm run dev` again. (SQLite is a single local file, so the
-> reset must run while the server is stopped.)
+> **Reset the demo to a clean state between rehearsals — two ways:**
+> - **In-app (no restart):** the avatar menu (top-right) has a **Reset demo** button that
+>   re-seeds the database on the live connection in a couple of seconds.
+> - **CLI:** stop the dev server (Ctrl-C), run `npm run db:reset`, then `npm run dev` again.
 
 ### Optional: live AI
 

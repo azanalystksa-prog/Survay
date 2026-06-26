@@ -20,7 +20,7 @@ try {
     }
   }
   run("npx prisma db push --skip-generate --accept-data-loss");
-  run("npx tsx prisma/seed.ts");
+  run("npx tsx prisma/seed-run.ts");
   console.log("\n✅ Database reset and seeded. Run `npm run dev`.");
 } catch (err) {
   console.error("\n❌ db:reset failed:", err?.message ?? err);

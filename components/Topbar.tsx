@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, ChevronDown, Check, RefreshCw } from "lucide-react";
+import { Search, Bell, ChevronDown, Check, RefreshCw, RotateCcw } from "lucide-react";
 import { t, type Lang } from "@/lib/strings";
 import { ROLE_LABELS, type Role } from "@/lib/enums";
 import { switchToRole, setLang } from "@/app/actions/session";
+import { resetDemo } from "@/app/actions/demo";
 
 interface Account {
   id: string;
@@ -24,6 +25,17 @@ export function Topbar({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  function doReset() {
+    setMenuOpen(false);
+    setResetting(true);
+    startTransition(async () => {
+      await resetDemo();
+      router.refresh();
+      setResetting(false);
+    });
+  }
 
   const roles: Role[] = ["RESEARCHER", "SUPERVISOR", "PANELIST", "ADMIN", "ENTERPRISE"];
 
@@ -108,6 +120,13 @@ export function Topbar({
               );
             })}
             <div className="my-1 border-t border-line" />
+            <button
+              onClick={doReset}
+              disabled={resetting}
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-gold hover:bg-soft-gold/40 disabled:opacity-60"
+            >
+              <RotateCcw size={14} className={resetting ? "animate-spin" : ""} /> {t("resetDemo", lang)}
+            </button>
             <a
               href="/"
               className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted hover:bg-soft"

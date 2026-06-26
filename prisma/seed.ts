@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { DEMO_EMAILS } from "../lib/demo-accounts";
-
-const prisma = new PrismaClient();
 
 // ---- Deterministic RNG so reseeds are reproducible ----
 let seedState = 1337;
@@ -36,8 +34,9 @@ const LAST_NAMES = [
   "Al-Mutairi", "Al-Zahrani", "Al-Saud", "Al-Rashid", "Al-Anazi", "Al-Juhani", "Al-Malki",
 ];
 
-async function reset() {
-  // Order matters for FK integrity.
+async function reset(prisma: PrismaClient) {
+  // Order matters for FK integrity. Uses deleteMany (not file deletion) so it is safe
+  // to run on a live database connection — this powers the in-app "Reset demo" button.
   await prisma.answer.deleteMany();
   await prisma.response.deleteMany();
   await prisma.option.deleteMany();
@@ -56,9 +55,9 @@ async function reset() {
   await prisma.enterpriseSurvey.deleteMany();
 }
 
-async function main() {
+export async function seedDatabase(prisma: PrismaClient) {
   seedState = 1337;
-  await reset();
+  await reset(prisma);
 
   // ---- Institutions ----
   const ksu = await prisma.institution.create({
@@ -598,7 +597,7 @@ async function main() {
     responses: await prisma.response.count(),
     answers: await prisma.answer.count(),
   };
-  console.log("Seed complete:", counts);
+  return counts;
 }
 
 // ---- Document templates (EthicsApproval markdown) ----
@@ -665,12 +664,3 @@ In accordance with the Saudi **Personal Data Protection Law (PDPL)**:
 - **Rights:** Participants may request access, correction, or deletion of their data.
 - **Cross-border transfer:** None. Data is processed and stored locally.`;
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

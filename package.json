@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:reset": "node scripts/db-reset.mjs",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "tsx prisma/seed-run.ts",
     "test": "tsx scripts/test-stats.ts",
     "test:integration": "tsx scripts/test-integration.ts",
     "test:e2e": "node scripts/e2e-golden-path.mjs"

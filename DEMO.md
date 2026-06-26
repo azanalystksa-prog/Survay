@@ -70,5 +70,6 @@ protect anonymity.
 
 ---
 
-**If anything ever looks empty**, just re-run `npm run db:reset` (server stopped) and start
-again — the demo always returns to the same rich, consistent state.
+**If anything ever looks empty**, reset to the same rich, consistent state in either way:
+- the **Reset demo** button in the avatar menu (top-right) — instant, no restart, or
+- `npm run db:reset` with the server stopped, then `npm run dev`.
