@@ -7,6 +7,7 @@ import { t, type Lang } from "@/lib/strings";
 import { ROLE_LABELS, type Role } from "@/lib/enums";
 import { switchToRole, setLang } from "@/app/actions/session";
 import { resetDemo } from "@/app/actions/demo";
+import { MobileNav } from "./MobileNav";
 
 interface Account {
   id: string;
@@ -55,6 +56,7 @@ export function Topbar({
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-card/80 px-4 backdrop-blur md:px-6">
+      <MobileNav lang={lang} activeRole={currentUser.role} />
       <div className="relative flex-1 max-w-md">
         <Search className="pointer-events-none absolute top-1/2 -translate-y-1/2 start-3 text-muted" size={16} />
         <input
