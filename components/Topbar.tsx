@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, ChevronDown, Check, RefreshCw, RotateCcw } from "lucide-react";
+import { ChevronDown, Check, RefreshCw, RotateCcw } from "lucide-react";
 import { t, type Lang } from "@/lib/strings";
 import { ROLE_LABELS, type Role } from "@/lib/enums";
 import { switchToRole, setLang } from "@/app/actions/session";
 import { resetDemo } from "@/app/actions/demo";
 import { MobileNav } from "./MobileNav";
+import { SearchPalette } from "./SearchPalette";
+import { NotificationsBell } from "./NotificationsBell";
 
 interface Account {
   id: string;
@@ -19,9 +21,11 @@ interface Account {
 export function Topbar({
   lang,
   currentUser,
+  studies = [],
 }: {
   lang: Lang;
   currentUser: { name: string; role: string; avatarInitials: string };
+  studies?: { id: string; title: string; status: string }[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -57,14 +61,7 @@ export function Topbar({
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-card/80 px-4 backdrop-blur md:px-6">
       <MobileNav lang={lang} activeRole={currentUser.role} />
-      <div className="relative flex-1 max-w-md">
-        <Search className="pointer-events-none absolute top-1/2 -translate-y-1/2 start-3 text-muted" size={16} />
-        <input
-          type="search"
-          placeholder={t("search", lang)}
-          className="w-full rounded-xl border border-line bg-soft/50 py-2 ps-9 pe-3 text-sm outline-none focus:border-primary"
-        />
-      </div>
+      <SearchPalette lang={lang} studies={studies} />
 
       {/* EN / ع language toggle */}
       <button
@@ -77,10 +74,7 @@ export function Topbar({
         <span className={lang === "ar" ? "text-primary" : "text-muted"}>ع</span>
       </button>
 
-      <button className="relative rounded-xl border border-line bg-card p-2 hover:bg-soft" aria-label="Notifications">
-        <Bell size={18} className="text-muted" />
-        <span className="absolute end-1.5 top-1.5 h-2 w-2 rounded-full bg-gold" />
-      </button>
+      <NotificationsBell lang={lang} />
 
       {/* Avatar + role switcher */}
       <div className="relative">

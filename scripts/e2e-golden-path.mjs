@@ -10,6 +10,8 @@ if (demo) {
   await prisma.answer.deleteMany({ where: { response: { panelistId: demo.id } } });
   await prisma.response.deleteMany({ where: { panelistId: demo.id } });
 }
+// Start the builder from a clean slate: remove any leftover DRAFT studies.
+await prisma.study.deleteMany({ where: { status: "DRAFT" } });
 await prisma.$disconnect();
 
 const EXEC = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -113,6 +115,7 @@ try {
   await page.goto(`${BASE}/researcher/dashboard`, { waitUntil: "networkidle" });
   await switchRole("Supervisor");
   await page.waitForURL("**/supervisor/oversight");
+  await page.getByText(/Studies overview|نظرة عامة على الدراسات/).first().waitFor(); // wait for content render
   const cosign = page.getByRole("button", { name: /Co-sign/i }).first();
   if (await cosign.isVisible().catch(() => false)) {
     await cosign.click();
@@ -125,6 +128,7 @@ try {
   // 11. Enterprise anonymity rule
   await switchRole("Enterprise");
   await page.waitForURL("**/enterprise");
+  await page.getByText(/Engagement by department|الانخراط حسب القسم/).first().waitFor(); // wait for content render
   check("11. Enterprise hides <5 group", await page.getByText(/group too small/i).first().isVisible());
 } catch (e) {
   fail++;

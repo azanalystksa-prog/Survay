@@ -2,11 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, ChevronUp, ChevronDown, Sparkles, Check, X, Rocket, GripVertical } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, Sparkles, Check, X, Rocket, GripVertical, Copy } from "lucide-react";
 import {
   addQuestion,
   updateQuestion,
   deleteQuestion,
+  duplicateQuestion,
   moveQuestion,
   addOption,
   updateOption,
@@ -193,6 +194,9 @@ export function StudyBuilder({
                     </button>
                     <button onClick={() => act(() => moveQuestion(q.id, "down"))} disabled={idx === questions.length - 1} className="rounded-lg p-1 text-muted hover:bg-soft disabled:opacity-30">
                       <ChevronDown size={16} />
+                    </button>
+                    <button onClick={() => act(() => duplicateQuestion(q.id))} title={lang === "ar" ? "تكرار" : "Duplicate"} className="rounded-lg p-1 text-muted hover:bg-soft hover:text-primary">
+                      <Copy size={14} />
                     </button>
                     <button onClick={() => act(() => deleteQuestion(q.id))} className="rounded-lg p-1 text-muted hover:bg-red-50 hover:text-danger">
                       <Trash2 size={15} />

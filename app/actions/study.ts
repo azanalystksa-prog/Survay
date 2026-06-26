@@ -87,6 +87,29 @@ export async function deleteQuestion(questionId: string) {
   revalidatePath("/researcher/create");
 }
 
+export async function duplicateQuestion(questionId: string) {
+  const q = await prisma.question.findUnique({ where: { id: questionId }, include: { options: { orderBy: { order: "asc" } } } });
+  if (!q) return;
+  // Shift everything after the source down by one to make room.
+  await prisma.question.updateMany({
+    where: { studyId: q.studyId, order: { gt: q.order } },
+    data: { order: { increment: 1 } },
+  });
+  await prisma.question.create({
+    data: {
+      studyId: q.studyId,
+      order: q.order + 1,
+      text: `${q.text} (copy)`,
+      type: q.type,
+      required: q.required,
+      scaleMin: q.scaleMin,
+      scaleMax: q.scaleMax,
+      options: q.options.length ? { create: q.options.map((o) => ({ order: o.order, label: o.label })) } : undefined,
+    },
+  });
+  revalidatePath("/researcher/create");
+}
+
 export async function moveQuestion(questionId: string, direction: "up" | "down") {
   const q = await prisma.question.findUnique({ where: { id: questionId } });
   if (!q) return;
