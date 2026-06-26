@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: SQLite does not support native enums. All "enum" fields are stored as
+// String and constrained via TypeScript union types in lib/enums.ts.
+
+model Institution {
+  id            String  @id @default(cuid())
+  name          String
+  type          String
+  verified      Boolean @default(false)
+  pdplCompliant Boolean @default(false)
+  users         User[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  name           String
+  email          String       @unique
+  role           String // RESEARCHER | SUPERVISOR | PANELIST | ADMIN | ENTERPRISE
+  institutionId  String?
+  institution    Institution? @relation(fields: [institutionId], references: [id])
+  specialty      String?
+  avatarInitials String
+
+  panelistProfile     PanelistProfile?
+  studiesAsResearcher Study[]          @relation("ResearcherStudies")
+  studiesAsSupervisor Study[]          @relation("SupervisorStudies")
+}
+
+model PanelistProfile {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  user          User    @relation(fields: [userId], references: [id])
+  kind          String // STUDENT | PROFESSIONAL | PUBLIC
+  specialty     String?
+  college       String?
+  gradeYear     String?
+  verifiedBy    String  @default("NONE") // UNI_EMAIL | CREDENTIAL | EMPLOYER | NONE
+  city          String
+  pointsBalance Int     @default(0)
+  available     Boolean @default(true)
+
+  responses Response[]
+  rewards   RewardLedger[]
+}
+
+model Study {
+  id             String   @id @default(cuid())
+  researcherId   String
+  researcher     User     @relation("ResearcherStudies", fields: [researcherId], references: [id])
+  supervisorId   String?
+  supervisor     User?    @relation("SupervisorStudies", fields: [supervisorId], references: [id])
+  title          String
+  description    String
+  status         String   @default("DRAFT") // DRAFT | PILOT | COLLECTING | CLOSED | CERTIFIED
+  targetN        Int
+  samplingMethod String   @default("RANDOM") // RANDOM | STRATIFIED | QUOTA | CONVENIENCE
+  pricingTier    String   @default("STANDARD") // STANDARD | TARGETED | PREMIUM
+  audienceFilter String? // JSON string
+  createdAt      DateTime @default(now())
+
+  questions      Question[]
+  samplingPlan   SamplingPlan?
+  responses      Response[]
+  ethicsApproval EthicsApproval?
+  certificate    Certificate?
+}
+
+model Question {
+  id       String  @id @default(cuid())
+  studyId  String
+  study    Study   @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  order    Int
+  text     String
+  type     String // SINGLE | MULTI | LIKERT | SHORT_TEXT | NUMBER
+  required Boolean @default(true)
+  scaleMin Int?
+  scaleMax Int?
+
+  options Option[]
+  answers Answer[]
+}
+
+model Option {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  order      Int
+  label      String
+
+  answers Answer[]
+}
+
+model SamplingPlan {
+  id            String  @id @default(cuid())
+  studyId       String  @unique
+  study         Study   @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  population     Int
+  confidence     Int
+  marginOfError  Float
+  computedN      Int
+
+  strata Stratum[]
+}
+
+model Stratum {
+  id             String       @id @default(cuid())
+  samplingPlanId String
+  samplingPlan   SamplingPlan @relation(fields: [samplingPlanId], references: [id], onDelete: Cascade)
+  name           String
+  populationPct  Float
+  quota          Int
+  collectedCount Int          @default(0)
+}
+
+model Response {
+  id            String          @id @default(cuid())
+  studyId       String
+  study         Study           @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  panelistId    String
+  panelist      PanelistProfile @relation(fields: [panelistId], references: [id])
+  startedAt     DateTime        @default(now())
+  completedAt   DateTime?
+  durationSec   Int             @default(0)
+  qualityStatus String          @default("VALID") // VALID | SPEEDER | FAILED_ATTENTION | DUPLICATE | BOT
+  included      Boolean         @default(true)
+
+  answers Answer[]
+}
+
+model Answer {
+  id          String   @id @default(cuid())
+  responseId  String
+  response    Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  valueText   String?
+  valueNumber Float?
+  optionId    String?
+  option      Option?  @relation(fields: [optionId], references: [id])
+}
+
+model EthicsApproval {
+  id                 String  @id @default(cuid())
+  studyId            String  @unique
+  study              Study   @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  status             String  @default("DRAFT") // DRAFT | SUBMITTED | APPROVED
+  approvalNumber     String?
+  committee          String
+  consentDocMarkdown String
+  infoSheetMarkdown  String
+  irbSummaryMarkdown String
+  pdplNoticeMarkdown String
+}
+
+model Certificate {
+  id                   String    @id @default(cuid())
+  studyId              String    @unique
+  study                Study     @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  issuedAt             DateTime  @default(now())
+  sampleMethod         String
+  validResponses       Int
+  targetResponses      Int
+  qualityPassRate      Float
+  botsBlocked          Int
+  collectionStart      DateTime
+  collectionEnd        DateTime
+  ethicsApprovalNumber String?
+  verifyCode           String    @unique
+  supervisorSignedAt   DateTime?
+  supervisorName       String?
+}
+
+model RewardLedger {
+  id         String          @id @default(cuid())
+  panelistId String
+  panelist   PanelistProfile @relation(fields: [panelistId], references: [id])
+  delta      Int
+  reason     String
+  createdAt  DateTime        @default(now())
+}
+
+model RegistryEntry {
+  id            String @id @default(cuid())
+  specialty     String
+  city          String
+  count         Int
+  status        String // INSTANT | ON_REQUEST
+  avgFulfilDays Int    @default(0)
+}
+
+model EnterpriseSurvey {
+  id              String @id @default(cuid())
+  orgName         String
+  title           String
+  responseRate    Float
+  engagementScore Float
+  eNPS            Int
+  departments     String // JSON: [{name, count, engagement}]
+}
+
+model VerificationRequest {
+  id                String   @id @default(cuid())
+  panelistId        String
+  name              String
+  claimedCredential String
+  specialty         String
+  status            String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  createdAt         DateTime @default(now())
+}

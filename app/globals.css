@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #0a8043;
+  --deep-green: #063d21;
+  --gold: #c8941e;
+  --canvas: #f2f7f4;
+  --line: #e3ece6;
+  --ink: #13241b;
+  --muted: #5e6f65;
+}
+
+html,
+body {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: var(--font-cairo), "Cairo", sans-serif;
+}
+
+.font-mono,
+.tabular {
+  font-family: var(--font-plex-mono), "IBM Plex Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Visible keyboard focus */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* RTL helpers: flip horizontal padding offsets handled by Tailwind logical where possible */
+[dir="rtl"] .flip-x {
+  transform: scaleX(-1);
+}
+
+/* Markdown rendering for ethics docs */
+.markdown h1 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0.6rem 0;
+}
+.markdown h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0.8rem 0 0.4rem;
+  color: var(--deep-green);
+}
+.markdown p {
+  margin: 0.5rem 0;
+  line-height: 1.7;
+}
+.markdown ul {
+  list-style: disc;
+  padding-inline-start: 1.4rem;
+  margin: 0.5rem 0;
+}
+.markdown li {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+.markdown strong {
+  color: var(--deep-green);
+}
+
+/* Print styles for certificate */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .print-full {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #d4e2da;
+  border-radius: 8px;
+}
